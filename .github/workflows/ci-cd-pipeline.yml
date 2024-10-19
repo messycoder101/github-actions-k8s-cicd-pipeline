@@ -38,7 +38,7 @@ jobs:
       - name: Scan Docker image for vulnerabilities with Trivy
         run: |
           docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
-          aquasec/trivy --quiet --exit-code 1 --severity HIGH,CRITICAL anuragiscoding/simple-html-app:latest
+          aquasec/trivy image --quiet --severity HIGH,CRITICAL anuragiscoding/simple-html-app:latest || exit 1
 
       - name: Set up Kubernetes CLI
         uses: azure/setup-kubectl@v1
