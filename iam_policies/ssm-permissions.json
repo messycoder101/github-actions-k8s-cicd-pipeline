@@ -20,6 +20,11 @@
                 "ssm:ListCommands"
             ],
             "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": "ssm:SendCommand",
+            "Resource": "arn:aws:ssm:*:*:document/AWS-RunShellScript"
         }
     ]
 }
