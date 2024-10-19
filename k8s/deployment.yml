@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sample-html-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sample-html-app
+  template:
+    metadata:
+      labels:
+        app: sample-html-app
+    spec:
+      containers:
+        - name: sample-html-app
+          image: your-docker-repo/sample-html-app:latest  # Replace with your Docker image
+          ports:
+            - containerPort: 80
