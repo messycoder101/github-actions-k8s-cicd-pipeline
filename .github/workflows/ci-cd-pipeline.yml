@@ -41,6 +41,19 @@ jobs:
           aquasec/trivy image --quiet --severity HIGH,CRITICAL anuragiscoding/simple-html-app:latest || exit 1 # to see full output
           # aquasec/trivy image --quiet --severity HIGH,CRITICAL anuragiscoding/simple-html-app:latest || exit 1 # to see only output for high,critical vulnerabilities
 
+      # Sonarqube analysis
+      
+      - name: Run SonarQube Scan
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}  # Make sure to add SONAR_TOKEN in GitHub Secrets
+        run: |
+          echo "Enable this scan after sonarqube server is setup and running"  
+          # sonar-scanner \
+          # -Dsonar.projectKey=your_project_key \
+          # -Dsonar.sources=. \
+          # -Dsonar.host.url=https://your-sonarqube-server \
+          # -Dsonar.login=$SONAR_TOKEN
+
       - name: Set up Kubernetes CLI
         uses: azure/setup-kubectl@v1
         with:
