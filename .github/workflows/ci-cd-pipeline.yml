@@ -17,6 +17,7 @@ jobs:
     env:
       CLUSTER_NAME: github-actions-cicd-demo-cluster  # Set your cluster name here
       APPLICATION_NAME: simple-html-app
+      EC2_INSTANCE_ID: i-017251f9dff0007f9
 
     steps:
       - name: Check out code
@@ -63,12 +64,22 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
           role-session-name: GitHub-OIDC-AWS
 
+      - name: Testing aws ssm send-command without secret variable
+        run: |
+          echo "Starting Docker container on EC2 instance"
+          aws ssm send-command --document-name "AWS-RunShellScript" --targets "Key=instanceids,Values=i-017251f9dff0007f9" --parameters 'commands=["echo Hello World"]'
+
+      - name: Testing aws ssm send-command with secret variable
+        run: |
+          echo "Starting Docker container on EC2 instance"
+          aws ssm send-command --document-name "AWS-RunShellScript" --targets "Key=instanceids,Values=${{ env.EC2_INSTANCE_ID }}" --parameters 'commands=["echo Hello World"]'
+
       - name: Start Docker container on EC2 instance
         run: |
           echo "Starting Docker container on EC2 instance"
           aws ssm send-command \
             --document-name "AWS-RunShellScript" \
-            --targets "Key=instanceids,Values=${{ secrets.EC2_INSTANCE_ID }}" \
+            --targets "Key=instanceids,Values=${{ env.EC2_INSTANCE_ID }}" \
             --parameters 'commands=["docker run -d --rm --name ${{ env.APPLICATION_NAME }} anuragiscoding/${{ env.APPLICATION_NAME }}:latest"]' \
             --comment "Deploying application inside a Docker container"
 
