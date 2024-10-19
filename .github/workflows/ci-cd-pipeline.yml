@@ -5,12 +5,18 @@ on:
     branches:
       - master
 
+permissions:
+  id-token: write # Required for AWS OIDC connection
+  contents: read   # Required for actions/checkout
+  pull-requests: write # Required for GitHub bot to comment on PRs
+
 jobs:
   build:
     runs-on: ubuntu-latest
 
     env:
       CLUSTER_NAME: github-actions-cicd-demo-cluster  # Set your cluster name here
+      APPLICATION_NAME: simple-html-app
 
     steps:
       - name: Check out code
@@ -27,42 +33,55 @@ jobs:
 
       - name: Check current directory
         run: |
-            pwd
-            ls
-            tree
+          pwd
+          ls
+          tree
       
       - name: Build Docker image
         run: |
-          docker build -t anuragiscoding/simple-html-app:latest -f simple-html-app/Dockerfile simple-html-app
+          docker build -t anuragiscoding/${{ env.APPLICATION_NAME }}:latest -f ${{ env.APPLICATION_NAME }}/Dockerfile ${{ env.APPLICATION_NAME }}
 
       - name: Scan Docker image for vulnerabilities with Trivy
         run: |
           docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
-          aquasec/trivy image --quiet --severity HIGH,CRITICAL anuragiscoding/simple-html-app:latest || exit 1 # to see full output
-          # aquasec/trivy image --quiet --severity HIGH,CRITICAL anuragiscoding/simple-html-app:latest || exit 1 # to see only output for high,critical vulnerabilities
+          aquasec/trivy image --quiet --severity HIGH,CRITICAL anuragiscoding/${{ env.APPLICATION_NAME }}:latest || exit 1
 
-      # Sonarqube analysis
-      
+      # SonarQube analysis
       - name: Run SonarQube Scan
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}  # Make sure to add SONAR_TOKEN in GitHub Secrets
         run: |
-          echo "Enable this scan after sonarqube server is setup and running"  
+          echo "Enable this scan after SonarQube server is set up and running"
           # sonar-scanner \
           # -Dsonar.projectKey=your_project_key \
           # -Dsonar.sources=. \
           # -Dsonar.host.url=https://your-sonarqube-server \
-          # -Dsonar.login=$SONAR_TOKEN
+          # -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+
+      - name: Configure AWS credentials from AWS account
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE }}
+          aws-region: ${{ secrets.AWS_REGION }}
+          role-session-name: GitHub-OIDC-AWS
+
+      - name: Start Docker container on EC2 instance
+        run: |
+          echo "Starting Docker container on EC2 instance"
+          aws ssm send-command \
+            --document-name "AWS-RunShellScript" \
+            --targets "Key=instanceids,Values=${{ secrets.EC2_INSTANCE_ID }}" \
+            --parameters 'commands=["docker run -d --rm --name ${{ env.APPLICATION_NAME }} anuragiscoding/${{ env.APPLICATION_NAME }}:latest"]' \
+            --comment "Deploying application inside a Docker container"
 
       - name: Set up Kubernetes CLI
         uses: azure/setup-kubectl@v1
         with:
           version: 'latest'
-
-      - name: Configure kubectl
-        run: |
-          aws eks --region eu-central-1 update-kubeconfig --name ${{ env.CLUSTER_NAME }}
-
+      
+    # # Use below code for deploying to EKS
+    #   - name: Configure kubectl
+    #     run: |
+    #       aws eks --region eu-central-1 update-kubeconfig --name ${{ env.CLUSTER_NAME }}
+        
       - name: Deploy to Kubernetes
         run: |
           kubectl apply -f k8s/deployment.yaml
