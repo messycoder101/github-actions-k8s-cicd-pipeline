@@ -33,7 +33,7 @@ jobs:
       
       - name: Build Docker image
         run: |
-          docker build -t anuragiscoding/simple-html-app:latest -f ./simple-html-app/Dockerfile .
+          docker build -t anuragiscoding/simple-html-app:latest -f simple-html-app/Dockerfile simple-html-app
 
       - name: Scan Docker image for vulnerabilities with Trivy
         run: |
