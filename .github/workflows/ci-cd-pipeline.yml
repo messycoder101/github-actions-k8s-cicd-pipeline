@@ -57,6 +57,10 @@ jobs:
           # -Dsonar.host.url=https://your-sonarqube-server \
           # -Dsonar.login=${{ secrets.SONAR_TOKEN }}
 
+      - name: Push Docker image to Docker Hub
+        run: |
+          docker push anuragiscoding/${{ env.APPLICATION_NAME }}:latest
+
       - name: Configure AWS credentials from AWS account
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -75,7 +79,7 @@ jobs:
           aws ssm send-command \
             --document-name "AWS-RunShellScript" \
             --targets "Key=instanceids,Values=${{ env.EC2_INSTANCE_ID }}" \
-            --parameters 'commands=["docker run -d --rm --name ${{ env.APPLICATION_NAME }} anuragiscoding/${{ env.APPLICATION_NAME }}:latest"]' \
+            --parameters 'commands=["docker run -d -p 80:80 --rm --name ${{ env.APPLICATION_NAME }} anuragiscoding/${{ env.APPLICATION_NAME }}:latest"]' \
             --comment "Deploying application inside a Docker container"
 
       - name: Set up Kubernetes CLI
@@ -87,12 +91,7 @@ jobs:
     #   - name: Configure kubectl
     #     run: |
     #       aws eks --region eu-central-1 update-kubeconfig --name ${{ env.CLUSTER_NAME }}
-      - name: Check directory
-        run: |
-          ls
-          pwd
-          tree
-          ls k8s
+
       - name: Deploy to Kubernetes
         run: |
           kubectl apply -f k8s/deployment.yml
