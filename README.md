@@ -1,3 +1,5 @@
+[![CI/CD Pipeline](https://github.com/messycoder101/github-actions-k8s-cicd-pipeline/actions/workflows/ci-cd-pipeline.yml/badge.svg)](https://github.com/messycoder101/github-actions-k8s-cicd-pipeline/actions/workflows/ci-cd-pipeline.yml)
+
 Here’s the complete content formatted in Markdown for a README file, including all headings, commands, and manifests. You can copy this entire block at once.
 
 ```markdown
