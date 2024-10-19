@@ -87,7 +87,12 @@ jobs:
     #   - name: Configure kubectl
     #     run: |
     #       aws eks --region eu-central-1 update-kubeconfig --name ${{ env.CLUSTER_NAME }}
-        
+      - name: Check directory
+        run: |
+          ls
+          pwd
+          tree
+          ls k8s
       - name: Deploy to Kubernetes
         run: |
           kubectl apply -f k8s/deployment.yaml
