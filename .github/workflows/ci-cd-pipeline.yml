@@ -29,11 +29,11 @@ jobs:
         run: |
             pwd
             ls
-            ls simple-html-app
+            tree
       
       - name: Build Docker image
         run: |
-          docker build -t anuragiscoding/simple-html-app:latest -f simple-html-app/Dockerfile .
+          docker build -t anuragiscoding/simple-html-app:latest -f ./simple-html-app/Dockerfile .
 
       - name: Scan Docker image for vulnerabilities with Trivy
         run: |
