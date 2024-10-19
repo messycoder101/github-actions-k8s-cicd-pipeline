@@ -64,12 +64,7 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
           role-session-name: GitHub-OIDC-AWS
 
-      - name: Testing aws ssm send-command without secret variable
-        run: |
-          echo "Starting Docker container on EC2 instance"
-          aws ssm send-command --document-name "AWS-RunShellScript" --targets "Key=instanceids,Values=i-017251f9dff0007f9" --parameters 'commands=["echo Hello World"]'
-
-      - name: Testing aws ssm send-command with secret variable
+      - name: Testing aws ssm send-command with environment variable
         run: |
           echo "Starting Docker container on EC2 instance"
           aws ssm send-command --document-name "AWS-RunShellScript" --targets "Key=instanceids,Values=${{ env.EC2_INSTANCE_ID }}" --parameters 'commands=["echo Hello World"]'
