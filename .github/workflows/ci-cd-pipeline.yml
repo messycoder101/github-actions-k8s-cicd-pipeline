@@ -68,12 +68,12 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
           role-session-name: GitHub-OIDC-AWS
 
-      - name: Testing aws ssm send-command with environment variable
-        run: |
-          echo "Starting Docker container on EC2 instance"
-          aws ssm send-command --document-name "AWS-RunShellScript" --targets "Key=instanceids,Values=${{ env.EC2_INSTANCE_ID }}" --parameters 'commands=["echo Hello World"]'
+      # - name: Testing aws ssm send-command with environment variable
+      #   run: |
+      #     echo "Starting Docker container on EC2 instance"
+      #     aws ssm send-command --document-name "AWS-RunShellScript" --targets "Key=instanceids,Values=${{ env.EC2_INSTANCE_ID }}" --parameters 'commands=["echo Hello World"]'
 
-      - name: Start Docker container on EC2 instance
+      - name: Deploy application to Docker container on EC2 instance
         run: |
           echo "Starting Docker container on EC2 instance"
           aws ssm send-command \
@@ -82,17 +82,17 @@ jobs:
             --parameters 'commands=["docker run -d -p 80:80 --rm --name ${{ env.APPLICATION_NAME }} anuragiscoding/${{ env.APPLICATION_NAME }}:latest"]' \
             --comment "Deploying application inside a Docker container"
 
-      - name: Set up Kubernetes CLI
-        uses: azure/setup-kubectl@v1
-        with:
-          version: 'latest'
+    #   - name: Set up Kubernetes CLI
+    #     uses: azure/setup-kubectl@v1
+    #     with:
+    #       version: 'latest'
       
-    # # Use below code for deploying to EKS
-    #   - name: Configure kubectl
-    #     run: |
-    #       aws eks --region eu-central-1 update-kubeconfig --name ${{ env.CLUSTER_NAME }}
+    # # # Use below code for deploying to EKS
+    # #   - name: Configure kubectl
+    # #     run: |
+    # #       aws eks --region eu-central-1 update-kubeconfig --name ${{ env.CLUSTER_NAME }}
 
-      - name: Deploy to Kubernetes
-        run: |
-          kubectl apply -f k8s/deployment.yml
-          kubectl apply -f k8s/service.yml
+    #   - name: Deploy to Kubernetes
+    #     run: |
+    #       kubectl apply -f k8s/deployment.yml
+    #       kubectl apply -f k8s/service.yml
